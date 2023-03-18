@@ -1,9 +1,11 @@
-def create(message):
+from ConvertMsg import convert
 
-    if message.content == 'teste':
-        return 'Testado!'
+def create(message, contexSize):
+
+    prompt = convert(message, contexSize)
     
-    if message.content == 'uwu':
-        return 'OwO'
+    print(prompt)
+    print(len(prompt))
+    
 
     return 'Olá, meu nome é Roger!'

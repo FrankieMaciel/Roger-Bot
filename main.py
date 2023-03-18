@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 
 from CreateMsg import create as messageResult
 
+contextSize = 600
+contextMessages = ''
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -18,7 +21,12 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
+    
+    global contextMessages
+    contextMessages += message.content + '\n'
+    if len(contextMessages) > contextSize:
+        contextMessages = contextMessages[-contextSize:]
 
-    await message.channel.send(messageResult(message))
+    await message.channel.send(messageResult(contextMessages, contextSize))
 
 client.run(TOKEN)
