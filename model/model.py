@@ -2,7 +2,7 @@ import torch
 
 class RogerModel(torch.nn.Module):
    def __init__(self):
-      super().__init__()
+      super(RogerModel, self).__init__()
 
       self.encoder = torch.nn.Sequential(
          torch.nn.Linear(600, 128),
@@ -11,15 +11,9 @@ class RogerModel(torch.nn.Module):
       )
 
       self.decoder = torch.nn.Sequential(
-         torch.nn.Linear(9, 18),
+         torch.nn.Linear(64, 82),
          torch.nn.ReLU(),
-         torch.nn.Linear(18, 36),
-         torch.nn.ReLU(),
-         torch.nn.Linear(36, 64),
-         torch.nn.ReLU(),
-         torch.nn.Linear(64, 128),
-         torch.nn.ReLU(),
-         torch.nn.Linear(128, 28 * 28),
+         torch.nn.Linear(82, 127),
          torch.nn.Sigmoid()
       )
       

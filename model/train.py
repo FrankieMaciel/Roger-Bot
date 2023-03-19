@@ -1,10 +1,36 @@
-alphabet = {'a','A','á','Á','à','À','â','Â','ã','Ã','b','B','c','C','ç','Ç','d','D','e',
-            'E','é','É','è','È','ê','Ê','f','F','g','G','h','H','i','I','í','Í','ì','Ì',
-            'î','Î','j','J','k','K','l','L','m','M','n','N','o','O','ó','Ó','ò','Ò','ô',
-            'Ô','õ','Õ','p','P','q','Q','r','R','s','S','t','T','u','U','ú','Ú','ù','Ù',
-            'û','Û','v','V','w','W','x','X','y','Y','z','Z','0','1','2','3','4','5','6',
-            '7','8','9','!','?','@','#','$','%','¨','&','*','(',')','-','_','+','=',"'",
-            '"','<','>',':',';','.',',','/','{','}','[',']'}
+import torch
+import os
 
-def train():
-    
+def train(model, epochs, learning_rate, data):
+
+    loss_function = torch.nn.MSELoss()
+
+    optimizer = torch.optim.Adam(
+        model.parameters(),
+        lr = learning_rate
+        )
+
+    for epoch in range(epochs):
+
+        allResults = torch.tensor([], requires_grad=True)
+        allideal = torch.tensor([], requires_grad=True)
+
+        for i in range(len(data)):
+            result = model(torch.tensor(data[i][0]))
+            allResults = torch.cat((allResults, result))
+
+            idealResult = torch.tensor(data[i][1])
+            allideal = torch.cat((allideal, idealResult))
+
+            # print(result)
+            # print(idealResult)
+
+        print(allResults)
+        loss = loss_function(allResults, allideal)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        print(f'| Epoch: {epoch} Loss: {loss}')
+
+    torch.save(model.state_dict(), './RogerModel.pth')
