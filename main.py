@@ -1,16 +1,19 @@
 import os
 
+import matplotlib.pyplot as plt
+from dotenv import load_dotenv
 import discord
 import torch
-from dotenv import load_dotenv
 
 from CreateMsg import create as messageResult
-from model.model import RogerModel
+from model.readModel import ReadModel
 
 contextSize = 600
 contextMessages = ''
 
-model = RogerModel()
+losses = []
+
+model = ReadModel()
 
 isExist = os.path.exists('./RogerModel.pth')
 # Verifica se existe um modelo já treinado, caso contrário, inicializa o treino.
@@ -36,9 +39,32 @@ async def on_message(message):
     if len(contextMessages) > contextSize:
         contextMessages = contextMessages[-contextSize:]
     
-    result = messageResult(model, contextMessages, contextSize)
-    print(result)
+    isToGenerate = False
+    if "!Roger " in message.content: isToGenerate = True
 
-    # await message.channel.send(messageResult(contextMessages, contextSize))
+    if isToGenerate and '--info' in message.content:
+        plt.plot(losses)
+        plt.title('Nivel de aprendizado')
+        plt.xlabel('Por mensagem')
+        plt.ylabel('Quão errado')
+        plt.savefig('grafico.png')
+
+        with open('grafico.png', 'rb') as imagem:
+            await message.channel.send('//Gráfico//', file=discord.File(imagem))
+        
+        isToGenerate = False
+
+    try:
+        result, loss = messageResult(model, contextMessages, contextSize, isToGenerate)
+        losses.append(loss)
+        if len(losses) > 50:
+            losses.pop(0)
+        # print(result)
+        if isToGenerate:
+            await message.channel.send(result)
+        print(losses)
+    except Exception as e:
+        await message.channel.send('//Error//: ' + str(e))
+
 
 client.run(TOKEN)

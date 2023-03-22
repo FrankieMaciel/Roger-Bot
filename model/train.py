@@ -1,32 +1,46 @@
 import torch
 import os
 
-def train(model, epochs, learning_rate, data):
+def train(model, epochs, learning_rate, data, message, alphabet):
 
-    loss_function = torch.nn.MSELoss()
+    loss_function = torch.nn.CrossEntropyLoss()
 
     optimizer = torch.optim.Adam(
         model.parameters(),
         lr = learning_rate
         )
+    
+    losses = []
 
     for epoch in range(epochs):
 
-        allResults = torch.tensor([], requires_grad=True)
-        allideal = torch.tensor([], requires_grad=True)
+        ideal = torch.tensor([])
+        results = torch.tensor([], requires_grad=True)
+
+        textResult = ''
 
         for i in range(len(data)):
-            result = model(torch.tensor(data[i][0]))
-            allResults = torch.cat((allResults, result))
+            # gera e armazena todos os resultados do modelo
+            result = model(torch.tensor(data[i]))
+            max_value = max(result)
+            index = result.tolist().index(max_value.item())
+            results = torch.cat((results, torch.tensor([index]) / 100))
 
-            idealResult = torch.tensor(data[i][1])
-            allideal = torch.cat((allideal, idealResult))
+            textResult += alphabet[index]
 
-            # print(result)
-            # print(idealResult)
+            # gera e amazena todos os resultados esperados
+            idealResult = torch.tensor([alphabet.index(message[i]) / 100])
+            ideal = torch.cat((ideal, idealResult))
 
-        print(allResults)
-        loss = loss_function(allResults, allideal)
+        # print(result)
+        # print(ideal)
+        # print(results)
+        # print(textResult)
+        print('teste')
+
+        loss = loss_function(results, ideal)
+        losses.append(loss.item())
+
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -34,3 +48,4 @@ def train(model, epochs, learning_rate, data):
         print(f'| Epoch: {epoch} Loss: {loss}')
 
     torch.save(model.state_dict(), './RogerModel.pth')
+    return sum(losses) / len(losses)

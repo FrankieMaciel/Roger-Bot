@@ -15,11 +15,10 @@ def generate(model, message, contextSize, alfabeto):
 
         prompt = convert(msg, contextSize)
         result = model(torch.tensor(prompt))
-
-        # print(prompt)
-
+       
         max_value = max(result)
         index = result.tolist().index(max_value.item())
+        # print(index)
         msg += alfabeto[index]
         textResult += alfabeto[index]
 

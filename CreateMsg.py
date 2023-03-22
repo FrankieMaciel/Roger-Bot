@@ -10,23 +10,26 @@ alphabet = {'a','A','á','Á','à','À','â','Â','ã','Ã','b','B','c','C','ç'
             'Ô','õ','Õ','p','P','q','Q','r','R','s','S','t','T','u','U','ú','Ú','ù','Ù',
             'û','Û','v','V','w','W','x','X','y','Y','z','Z','0','1','2','3','4','5','6',
             '7','8','9','!','?','@','#','$','%','¨','&','*','(',')','-','_','+','=',"'",
-            '"','<','>',':',';','.',',','/','{','}','[',']','\n'}
+            '"','<','>',':',';','.',',','/','{','}','[',']','\n',' '}
 
-def create(model, message, contexSize):
+def create(model, message, contexSize, isToGenerate):
 
     prompt = convert(message, contexSize)
-    data = createData(prompt, message, contexSize, list(alphabet))
+    print('Prompt criado!')
+    data = createData(prompt, message, contexSize)
+    print('Dados criado!')
+    # print(prompt)
+    # print(len(alphabet))
 
-    print(data)
+    epochs = 10
+    learning_rate = 0.001
 
-    print(len(alphabet))
+    # treina com as mensagens recebidas
+    loss = train(model, epochs, learning_rate, data, message, list(alphabet))
+    print('Modelo treinado!')
 
-    epochs = 1
-    learning_rate = 0.003
-
-    # print(data)
-    train(model, epochs, learning_rate, data)
-
+    # gera respostas
     textResult = generate(model, message, contexSize, list(alphabet))
+    print('Resposta gerada!')
 
-    return textResult
+    return textResult, loss

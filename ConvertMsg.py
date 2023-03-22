@@ -17,7 +17,7 @@ def convert(Msg, contextSize):
 
     convertText = [ord(c) for c in Msg]
     for i in range(contextSize - len(convertText)):
-        convertText.append(0)
+        convertText.append(0.0)
 
     embedding_dimension = 1
     PositionEnconding = create_position_embedding(embedding_dimension, contextSize)
@@ -26,6 +26,6 @@ def convert(Msg, contextSize):
     for emb in PositionEnconding:
         flat_position_embedding.extend(emb)
 
-    result_array = [(a + b) if b != 0 else 0 for a, b in zip(flat_position_embedding, convertText)]
+    result_array = [(a + b) for a, b in zip(flat_position_embedding, convertText)]
 
     return result_array
