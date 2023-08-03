@@ -55,9 +55,9 @@ if os.path.exists(loadFilename):
 
 
 def train(batches):
-    for response in batches:
-        trainIters(model_name, voc, response, encoder, decoder, encoder_optimizer, decoder_optimizer,
-                    embedding, save_dir, batch_size, clip)
+    loss = trainIters(model_name, voc, batches, encoder, decoder, encoder_optimizer, decoder_optimizer,
+                embedding, save_dir, batch_size, clip)
+    return loss
 
 def testModel(inputString):
     # Initialize search module
@@ -66,3 +66,17 @@ def testModel(inputString):
     # Begin chatting (uncomment and run the following line to begin)
     response = evaluateInput(inputString, encoder, decoder, searcher, voc)
     return response
+
+def saveModel(loss):
+    directory = save_dir
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    torch.save({
+        'en': encoder.state_dict(),
+        'de': decoder.state_dict(),
+        'en_opt': encoder_optimizer.state_dict(),
+        'de_opt': decoder_optimizer.state_dict(),
+        'loss': loss,
+        'voc_dict': voc.__dict__,
+        'embedding': embedding.state_dict()
+    }, os.path.join(directory, '{}_{}.tar'.format(model_name, 'checkpoint')))

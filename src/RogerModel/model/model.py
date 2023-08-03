@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from src.RogerModel.config import SOS_token, device
+from src.RogerModel.config import SOS_token, device, EOS_token
 
 class GreedySearchDecoder(nn.Module):
     def __init__(self, encoder, decoder):
@@ -27,6 +27,10 @@ class GreedySearchDecoder(nn.Module):
             # Record token and score
             all_tokens = torch.cat((all_tokens, decoder_input), dim=0)
             all_scores = torch.cat((all_scores, decoder_scores), dim=0)
+
+            if (decoder_input == EOS_token):
+                break
+            
             # Prepare current token to be next decoder input (add a dimension)
             decoder_input = torch.unsqueeze(decoder_input, 0)
         # Return collections of word tokens and scores

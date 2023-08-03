@@ -1,8 +1,17 @@
 import torch
+import string
 
 from src.RogerModel.config import MAX_LENGTH, device
 from src.RogerModel.functions.normalizeString import normalizeString
 from src.RogerModel.functions.tokenizeString import indexesFromSentence
+
+def verificar_pontuacao(texto):
+    pontuacoes = string.punctuation
+    for caractere in texto:
+        if caractere in pontuacoes:
+            return True
+        else:
+            return False
 
 def evaluate(encoder, decoder, searcher, voc, sentence, max_length=MAX_LENGTH):
     ### Format input sentence as a batch
@@ -28,12 +37,22 @@ def evaluateInput(inputString, encoder, decoder, searcher, voc):
         input_sentence = inputString
         # Normalize sentence
         input_sentence = normalizeString(input_sentence)
+        print(input_sentence)
         # Evaluate sentence
         output_words = evaluate(encoder, decoder, searcher, voc, input_sentence)
         # Format and print response sentence
+        print(output_words)
         output_words[:] = [x for x in output_words if not (x == 'EOS' or x == 'PAD')]
-        print('Bot:', ' '.join(output_words))
-        return ' '.join(output_words)
+
+        finalSentece = '';
+        output_words[0] = output_words[0].capitalize()
+        for word in output_words:
+            if verificar_pontuacao(word):
+                finalSentece += word
+            else:
+                finalSentece += ' ' + word
+
+        return finalSentece
 
     except KeyError:
         print("Error: Encountered unknown word.")

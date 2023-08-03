@@ -18,9 +18,9 @@ decoder_n_layers = 2
 dropout = 0.1
 batch_size = 1
 
-MAX_LENGTH = 10  # Maximum sentence length to consider
+MAX_LENGTH = 200  # Maximum sentence length to consider
 
-MIN_COUNT = 3    # Minimum word count threshold for trimming
+MIN_COUNT = 0    # Minimum word count threshold for trimming
 
 # Configure training/optimization
 clip = 50.0

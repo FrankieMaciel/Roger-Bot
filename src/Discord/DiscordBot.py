@@ -1,5 +1,5 @@
 # from src.functions.generateMessage import create
-from ..RogerModel.Roger import run
+from ..RogerModel.Roger import run, learn
 
 from dotenv import load_dotenv
 import discord
@@ -32,16 +32,18 @@ async def on_message(message):
         for prefix in prefixes:
             if prefix in message.content.lower(): havePrefix = True
         
-        if not havePrefix: return
-
-    prompt = message.content.replace('roger',"")
-    prompt = prompt.replace('Roger',"")
-
-    print(prompt)
-    result = run(prompt)
-    print(result)
-    if result != '':
-        await message.channel.send(result);
+        if havePrefix: 
+            result = run(message.content)
+            print(result)
+            if result != '':
+                await message.channel.send(result);
+    else:
+        result = run(message.content)
+        print(result)
+        if result != '':
+            await message.channel.send(result);
+    
+    # learn(result, message.content)
 
     # System commands of Roger
     haveCommandPrefix = False

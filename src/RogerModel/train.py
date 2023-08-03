@@ -85,28 +85,32 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
 
     return sum(print_losses) / n_totals
 
-def trainIters(model_name, voc, batche, encoder, decoder, encoder_optimizer, decoder_optimizer, embedding, save_dir, batch_size, clip):
+def trainIters(model_name, voc, batches, encoder, decoder, encoder_optimizer, decoder_optimizer, embedding, save_dir, batch_size, clip):
     # Training loop
     print("Training...")
-    training_batch = batche
-    # Extract fields from batch
-    input_variable, lengths, target_variable, mask, max_target_len = training_batch
+    sumLoss = 0
+    for batche in batches:
+        training_batch = batche
+        # Extract fields from batch
+        input_variable, lengths, target_variable, mask, max_target_len = training_batch
 
-    # Run a training iteration with batch
-    loss = train(input_variable, lengths, target_variable, mask, max_target_len, encoder,
-                decoder, embedding, encoder_optimizer, decoder_optimizer, batch_size, clip)
+        # Run a training iteration with batch
+        loss = train(input_variable, lengths, target_variable, mask, max_target_len, encoder,
+                    decoder, embedding, encoder_optimizer, decoder_optimizer, batch_size, clip)
 
-    print("loss: {:.4f}".format(loss))
+        sumLoss += loss
+        print("loss: {:.4f}".format(loss))
+    return sumLoss
 
-    directory = save_dir
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    torch.save({
-        'en': encoder.state_dict(),
-        'de': decoder.state_dict(),
-        'en_opt': encoder_optimizer.state_dict(),
-        'de_opt': decoder_optimizer.state_dict(),
-        'loss': loss,
-        'voc_dict': voc.__dict__,
-        'embedding': embedding.state_dict()
-    }, os.path.join(directory, '{}_{}.tar'.format(model_name, 'checkpoint')))
+    # directory = save_dir
+    # if not os.path.exists(directory):
+    #     os.makedirs(directory)
+    # torch.save({
+    #     'en': encoder.state_dict(),
+    #     'de': decoder.state_dict(),
+    #     'en_opt': encoder_optimizer.state_dict(),
+    #     'de_opt': decoder_optimizer.state_dict(),
+    #     'loss': loss,
+    #     'voc_dict': voc.__dict__,
+    #     'embedding': embedding.state_dict()
+    # }, os.path.join(directory, '{}_{}.tar'.format(model_name, 'checkpoint')))

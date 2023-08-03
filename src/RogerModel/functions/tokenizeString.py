@@ -4,9 +4,15 @@ import itertools
 from src.RogerModel.config import PAD_token, EOS_token
 from src.RogerModel.functions.normalizeString import normalizeString
 
+def getWordVoc(word, voc):
+    if word in voc.word2index:
+        return voc.word2index[word]
+    else:
+        return 0
+
 def indexesFromSentence(voc, sentence):
-    print(sentence)
-    return [voc.word2index[word] for word in sentence.split(' ')] + [EOS_token]
+
+    return [getWordVoc(word, voc) for word in sentence.split(' ')] + [EOS_token]
 
 def zeroPadding(l, fillvalue=PAD_token):
     return list(itertools.zip_longest(*l, fillvalue=fillvalue))
@@ -47,7 +53,7 @@ def batch2TrainData(voc, pair_batch):
     for pair in pair_batch:
         input_batch.append(pair[0])
         output_batch.append(pair[1])
-    print(input_batch)
+
     inp, lengths = inputVar(input_batch, voc)
     output, mask, max_target_len = outputVar(output_batch, voc)
     return inp, lengths, output, mask, max_target_len
@@ -55,5 +61,6 @@ def batch2TrainData(voc, pair_batch):
 def tokenize(pair, voc):
   # Example for validation
   normPair = [[normalizeString(sentece) for sentece in pair[0]]]
+  print(normPair)
   batches = batch2TrainData(voc, normPair)
   return batches
