@@ -2,7 +2,10 @@ import torch
 import itertools
 
 from src.RogerModel.config import PAD_token, EOS_token
-from src.RogerModel.functions.normalizeString import normalizeString
+
+from transformers import AutoModel, AutoTokenizer
+# BERT Large
+tokenizer = AutoTokenizer.from_pretrained('neuralmind/bert-base-portuguese-cased', do_lower_case=False)
 
 def getWordVoc(word, voc):
     if word in voc.word2index:
@@ -10,9 +13,9 @@ def getWordVoc(word, voc):
     else:
         return 0
 
-def indexesFromSentence(voc, sentence):
-
-    return [getWordVoc(word, voc) for word in sentence.split(' ')] + [EOS_token]
+def indexesFromSentence(sentence):
+    encoding = tokenizer.encode(sentence)
+    return encoding
 
 def zeroPadding(l, fillvalue=PAD_token):
     return list(itertools.zip_longest(*l, fillvalue=fillvalue))
@@ -30,7 +33,7 @@ def binaryMatrix(l, value=PAD_token):
 
 # Returns padded input sequence tensor and lengths
 def inputVar(l, voc):
-    indexes_batch = [indexesFromSentence(voc, sentence) for sentence in l]
+    indexes_batch = [indexesFromSentence(sentence) for sentence in l]
     lengths = torch.tensor([len(indexes) for indexes in indexes_batch])
     padList = zeroPadding(indexes_batch)
     padVar = torch.LongTensor(padList)
@@ -38,7 +41,7 @@ def inputVar(l, voc):
 
 # Returns padded target sequence tensor, padding mask, and max target length
 def outputVar(l, voc):
-    indexes_batch = [indexesFromSentence(voc, sentence) for sentence in l]
+    indexes_batch = [indexesFromSentence(sentence) for sentence in l]
     max_target_len = max([len(indexes) for indexes in indexes_batch])
     padList = zeroPadding(indexes_batch)
     mask = binaryMatrix(padList)
@@ -60,7 +63,5 @@ def batch2TrainData(voc, pair_batch):
 
 def tokenize(pair, voc):
   # Example for validation
-  normPair = [[normalizeString(sentece) for sentece in pair[0]]]
-  print(normPair)
-  batches = batch2TrainData(voc, normPair)
+  batches = batch2TrainData(voc, pair)
   return batches

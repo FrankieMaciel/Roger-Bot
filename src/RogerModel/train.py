@@ -1,9 +1,21 @@
 import torch
 import torch.nn as nn
+import numpy as np
 import random
-import os
 
-from src.RogerModel.config import device, MAX_LENGTH, teacher_forcing_ratio, SOS_token, hidden_size
+from src.RogerModel.config import device, MAX_LENGTH, teacher_forcing_ratio, SOS_token
+
+def valor_randomico_do_tensor(tensor):
+    # Converte o tensor para um array numpy
+    array_tensor = np.array(tensor)
+    # Obtém a forma (shape) do array
+    shape = array_tensor.shape
+    # Gera uma tupla de índices aleatórios dentro do shape do array
+    random_indices = tuple(np.random.randint(0, dim) for dim in shape)
+    # Obtém o valor aleatório do tensor/array usando os índices gerados
+    valor_randomico = array_tensor[random_indices]
+    
+    return valor_randomico
 
 def maskNLLLoss(inp, target, mask):
     nTotal = mask.sum()
@@ -50,9 +62,10 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
             decoder_output, decoder_hidden = decoder(
                 decoder_input, decoder_hidden, encoder_outputs
             )
+
             # Teacher forcing: next input is current target
             decoder_input = target_variable[t].view(1, -1)
-            # Calculate and accumulate loss
+
             mask_loss, nTotal = maskNLLLoss(decoder_output, target_variable[t], mask[t])
             loss += mask_loss
             print_losses.append(mask_loss.item() * nTotal)
@@ -101,16 +114,3 @@ def trainIters(model_name, voc, batches, encoder, decoder, encoder_optimizer, de
         sumLoss += loss
         print("loss: {:.4f}".format(loss))
     return sumLoss
-
-    # directory = save_dir
-    # if not os.path.exists(directory):
-    #     os.makedirs(directory)
-    # torch.save({
-    #     'en': encoder.state_dict(),
-    #     'de': decoder.state_dict(),
-    #     'en_opt': encoder_optimizer.state_dict(),
-    #     'de_opt': decoder_optimizer.state_dict(),
-    #     'loss': loss,
-    #     'voc_dict': voc.__dict__,
-    #     'embedding': embedding.state_dict()
-    # }, os.path.join(directory, '{}_{}.tar'.format(model_name, 'checkpoint')))

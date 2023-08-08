@@ -4,15 +4,16 @@ import os
 # Default word tokens
 PAD_token = 0  # Used for padding short sentences
 SOS_token = 1  # Start-of-sentence token
-EOS_token = 2  # End-of-sentence token
+EOS_token = 102  # End-of-sentence token
+DEL_token = 3  # End-of-sentence token
 
 USE_CUDA = torch.cuda.is_available()
 device = torch.device("cuda" if USE_CUDA else "cpu")
 
 # Configure model
-model_name = 'Roger_Model'
+model_name = 'Roger'
 attn_model = 'dot' # dot, general, concat
-hidden_size = 500
+hidden_size = 512
 encoder_n_layers = 2
 decoder_n_layers = 2
 dropout = 0.1

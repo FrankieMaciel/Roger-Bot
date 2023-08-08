@@ -10,14 +10,15 @@ from src.RogerModel.model.model import GreedySearchDecoder
 from src.RogerModel.evaluate import evaluateInput
 
 from src.RogerModel.train import trainIters
+from src.RogerModel.vocab import Voc
 
-from src.RogerModel.functions.createVocab import getVocab
-voc = getVocab('Roger_Vocab')
+voc = Voc(model_name)
 
-loadFilename = os.path.join(save_dir, '{}_checkpoint.tar'.format(model_name))
+loadFilename = os.path.join(save_dir, '{}_checkpoint.tar'.format(model_name + '_Default'))
+loadCheckpoint = os.path.join(save_dir, '{}_checkpoint.tar'.format(model_name))
 
 # Load model if a ``loadFilename`` is provided
-if os.path.exists(loadFilename):
+if os.path.exists(loadFilename) and not os.path.exists(loadCheckpoint):
     # If loading on same machine the model was trained on
     checkpoint = torch.load(loadFilename)
     # If loading a model trained on GPU to CPU
@@ -27,16 +28,26 @@ if os.path.exists(loadFilename):
     encoder_optimizer_sd = checkpoint['en_opt']
     decoder_optimizer_sd = checkpoint['de_opt']
     embedding_sd = checkpoint['embedding']
-    voc.__dict__ = checkpoint['voc_dict']
+    # voc.__dict__ = checkpoint['voc_dict']
+elif os.path.exists(loadCheckpoint):
+    # If loading on same machine the model was trained on
+    checkpoint = torch.load(loadCheckpoint)
+    # If loading a model trained on GPU to CPU
+    #checkpoint = torch.load(loadFilename, map_location=torch.device('cpu'))
+    encoder_sd = checkpoint['en']
+    decoder_sd = checkpoint['de']
+    encoder_optimizer_sd = checkpoint['en_opt']
+    decoder_optimizer_sd = checkpoint['de_opt']
+    embedding_sd = checkpoint['embedding']
 
 print('Building encoder and decoder ...')
 # Initialize word embeddings
-embedding = nn.Embedding(voc.num_words, hidden_size)
+embedding = nn.Embedding(30000, hidden_size)
 if os.path.exists(loadFilename):
     embedding.load_state_dict(embedding_sd)
 # Initialize encoder & decoder models
 encoder = EncoderRNN(hidden_size, embedding, encoder_n_layers, dropout)
-decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, voc.num_words, decoder_n_layers, dropout)
+decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, 30000, decoder_n_layers, dropout)
 if os.path.exists(loadFilename):
     encoder.load_state_dict(encoder_sd)
     decoder.load_state_dict(decoder_sd)
@@ -67,7 +78,7 @@ def testModel(inputString):
     response = evaluateInput(inputString, encoder, decoder, searcher, voc)
     return response
 
-def saveModel(loss):
+def saveModel(loss, name):
     directory = save_dir
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -79,4 +90,4 @@ def saveModel(loss):
         'loss': loss,
         'voc_dict': voc.__dict__,
         'embedding': embedding.state_dict()
-    }, os.path.join(directory, '{}_{}.tar'.format(model_name, 'checkpoint')))
+    }, os.path.join(directory, '{}_{}.tar'.format(name, 'checkpoint')))
