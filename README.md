@@ -1,2 +1,2 @@
 # Roger-Bot
-Um bot para o Discord chamado Roger.
+Um bot chamado Roger.
