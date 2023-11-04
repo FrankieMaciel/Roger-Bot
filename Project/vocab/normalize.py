@@ -7,13 +7,10 @@ def unicodeToAscii(s):
         if unicodedata.category(c) != 'Mn'
     )
 
-# Lowercase, trim, and remove non-letter characters
 def normalizeString(s):
     # Remove espaços em branco extras do início e fim da string
     s = s.strip()
     
-    # # Substitui caracteres acentuados por suas formas não acentuadas
-    # s = ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
     listWords = s.split(' ')
     listWords = [word.lower() for word in listWords]
 

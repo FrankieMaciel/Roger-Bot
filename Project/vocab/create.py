@@ -1,7 +1,7 @@
 import os
 
-from src.RogerModel.functions.normalizeString import normalizeString
-from src.RogerModel.vocab import Voc
+from Project.vocab.normalize import normalizeString
+from Project.vocab.vocab import Voc
 
 # Read query/response pairs and return a voc object
 def readVocs(datafile):
@@ -27,9 +27,6 @@ def loadPrepareData(datafile, vocabName):
     print("Counted words:", voc.num_words)
     return voc, pairs
 
-def getVocab(vocabName):
-    pathdir = os.path.join('src','RogerModel','data', 'basedata.txt')
-
-    voc, pairs = loadPrepareData(pathdir, vocabName)
-
+def getVocab(vocabName, dataDir):
+    voc, pairs = loadPrepareData(dataDir, vocabName)
     return voc

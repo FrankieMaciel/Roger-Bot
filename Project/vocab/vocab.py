@@ -1,4 +1,4 @@
-from src.RogerModel.config import PAD_token, SOS_token, EOS_token, DEL_token
+from Project.config.bot import PAD_token, SOS_token, EOS_token
 
 class Voc:
     def __init__(self, name):
@@ -6,8 +6,8 @@ class Voc:
         self.trimmed = False
         self.word2index = {}
         self.word2count = {}
-        self.index2word = {PAD_token: "PAD", SOS_token: "SOS", EOS_token: "EOS", DEL_token: "DEL"}
-        self.num_words = 4  # Count SOS, EOS, PAD
+        self.index2word = {PAD_token: "PAD", SOS_token: "SOS", EOS_token: "EOS"}
+        self.num_words = 3  # Count SOS, EOS, PAD
 
     def addSentence(self, sentence):
         for word in sentence.split(' '):

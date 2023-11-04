@@ -1,21 +1,8 @@
+from Project.config.bot import device, MAX_LENGTH, teacher_forcing_ratio, SOS_token
+
 import torch
 import torch.nn as nn
-import numpy as np
 import random
-
-from src.RogerModel.config import device, MAX_LENGTH, teacher_forcing_ratio, SOS_token
-
-def valor_randomico_do_tensor(tensor):
-    # Converte o tensor para um array numpy
-    array_tensor = np.array(tensor)
-    # Obtém a forma (shape) do array
-    shape = array_tensor.shape
-    # Gera uma tupla de índices aleatórios dentro do shape do array
-    random_indices = tuple(np.random.randint(0, dim) for dim in shape)
-    # Obtém o valor aleatório do tensor/array usando os índices gerados
-    valor_randomico = array_tensor[random_indices]
-    
-    return valor_randomico
 
 def maskNLLLoss(inp, target, mask):
     nTotal = mask.sum()
@@ -62,7 +49,6 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
             decoder_output, decoder_hidden = decoder(
                 decoder_input, decoder_hidden, encoder_outputs
             )
-
             # Teacher forcing: next input is current target
             decoder_input = target_variable[t].view(1, -1)
 
@@ -98,19 +84,28 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
 
     return sum(print_losses) / n_totals
 
-def trainIters(model_name, voc, batches, encoder, decoder, encoder_optimizer, decoder_optimizer, embedding, save_dir, batch_size, clip):
+def trainIters(
+        batches, 
+        encoder, 
+        decoder, 
+        encoder_optimizer, 
+        decoder_optimizer, 
+        embedding,
+        batch_size,
+        clip
+    ):
     # Training loop
     print("Training...")
     sumLoss = 0
-    for batche in batches:
-        training_batch = batche
-        # Extract fields from batch
-        input_variable, lengths, target_variable, mask, max_target_len = training_batch
+    for epoch in range(10):
+        for batche in batches:
+            training_batch = batche
+            # Extract fields from batch
+            input_variable, lengths, target_variable, mask, max_target_len = training_batch
+            # Run a training iteration with batch
+            loss = train(input_variable, lengths, target_variable, mask, max_target_len, encoder,
+                        decoder, embedding, encoder_optimizer, decoder_optimizer, batch_size, clip)
 
-        # Run a training iteration with batch
-        loss = train(input_variable, lengths, target_variable, mask, max_target_len, encoder,
-                    decoder, embedding, encoder_optimizer, decoder_optimizer, batch_size, clip)
-
-        sumLoss += loss
-        print("loss: {:.4f}".format(loss))
+            sumLoss += loss
+            print("loss: {:.4f}".format(loss))
     return sumLoss
