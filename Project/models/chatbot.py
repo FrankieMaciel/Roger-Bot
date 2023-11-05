@@ -4,8 +4,9 @@ from Project.models.encoder import EncoderRNN
 from Project.train.train import trainIters
 from Project.vocab.create import getVocab
 from Project.data.process import processLines
-from Project.vocab.tokenizer import tokenize, indexesFromSentence
+from Project.vocab.tokenizer import indexesFromSentence
 from Project.vocab.normalize import normalizeString
+from Project.vocab.format import format_phrase
 
 from torch import optim
 import torch.nn as nn
@@ -69,10 +70,10 @@ class chatbot(nn.Module):
             )
             decoder_scores, decoder_input = torch.max(decoder_output, dim=1)
 
+            if (decoder_input == EOS_token): break
+
             all_tokens = torch.cat((all_tokens, decoder_input), dim=0)
             all_scores = torch.cat((all_scores, decoder_scores), dim=0)
-
-            if (decoder_input == EOS_token): break
 
             decoder_input = torch.unsqueeze(decoder_input, 0)
 
@@ -144,16 +145,13 @@ class chatbot(nn.Module):
         input_batch = torch.LongTensor(indexes_batch).transpose(0, 1)
         input_batch = input_batch.to(device)
         lengths = lengths.to("cpu")
-        print(input_batch)
 
         tokens, scores = self.forward(input_batch, lengths, MAX_LENGTH)
-        # i = 0
-        # tokens = torch.cat([tokens[:i], tokens[i+1:]])
-        # lastIndex = (tokens.size(dim=0)) - 1
-
-        # tokens = torch.cat([tokens[:lastIndex], tokens[lastIndex+1:]])
+        
         decoded_words = [self.voc.index2word[token.item()] for token in tokens]
-        return ' '.join(decoded_words)
+        response = format_phrase(decoded_words)
+
+        return response
 
 
 
