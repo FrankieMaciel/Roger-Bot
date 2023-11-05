@@ -1,8 +1,10 @@
-from Project.config.bot import device, MAX_LENGTH, teacher_forcing_ratio, SOS_token
+from Project.config.bot import device, MAX_LENGTH, teacher_forcing_ratio, SOS_token, PAD_token
+from Project.vocab.tokenizer import tokenize
 
 import torch
 import torch.nn as nn
 import random
+import numpy as np
 
 def maskNLLLoss(inp, target, mask):
     nTotal = mask.sum()
@@ -85,7 +87,8 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
     return sum(print_losses) / n_totals
 
 def trainIters(
-        batches, 
+        voc,
+        linhas_separadas, 
         encoder, 
         decoder, 
         encoder_optimizer, 
@@ -98,14 +101,30 @@ def trainIters(
     print("Training...")
     sumLoss = 0
     for epoch in range(10):
+        sumLoss = 0
+
+        batches = [tokenize([line], voc) for line in linhas_separadas]
+
+        print('Epoch: {}'.format(epoch))
         for batche in batches:
             training_batch = batche
             # Extract fields from batch
             input_variable, lengths, target_variable, mask, max_target_len = training_batch
+            # Randomiza posições aléatorios pra ocultar
+            # linhas, colunas = input_variable.shape
+            # minpos = 1
+            # maxpos = round((linhas * colunas) / 3)
+            # if (maxpos > 1):
+            #     qm = np.random.randint(minpos, maxpos + 1)
+            #     indices_aleatorios = np.random.choice(linhas * colunas, qm, replace=False)
+            #     coordenadas_aleatorias = np.unravel_index(indices_aleatorios, input_variable.shape)
+            #     for coord in zip(*coordenadas_aleatorias):
+            #         input_variable[coord] = PAD_token
+
             # Run a training iteration with batch
             loss = train(input_variable, lengths, target_variable, mask, max_target_len, encoder,
                         decoder, embedding, encoder_optimizer, decoder_optimizer, batch_size, clip)
 
             sumLoss += loss
-            print("loss: {:.4f}".format(loss))
+        print("loss: {:.4f}".format(sumLoss / len(batches)))
     return sumLoss

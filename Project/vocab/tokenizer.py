@@ -1,13 +1,13 @@
 from Project.config.bot import PAD_token, EOS_token
 
 import torch
+import random
 import itertools
 
 def getWordVoc(word, voc):
     if word in voc.word2index:
         return voc.word2index[word]
     else:
-        print(word)
         return PAD_token
 
 def indexesFromSentence(voc, sentence):
@@ -27,9 +27,18 @@ def binaryMatrix(l, value=PAD_token):
                 m[i].append(1)
     return m
 
+def removeRandomIndexes(indexes):
+    # Gere uma lista de índices aleatórios a serem removidos
+    random_indexes = random.sample(range(len(indexes)), k=random.randint(0, round(len(indexes) / 3)))
+    
+    # Remova os índices aleatórios da sequência
+    indexes = [index for i, index in enumerate(indexes) if i not in random_indexes]
+    
+    return indexes
+
 # Returns padded input sequence tensor and lengths
 def inputVar(l, voc):
-    indexes_batch = [indexesFromSentence(voc, sentence) for sentence in l]
+    indexes_batch = [removeRandomIndexes(indexesFromSentence(voc, sentence)) for sentence in l]
     lengths = torch.tensor([len(indexes) for indexes in indexes_batch])
     padList = zeroPadding(indexes_batch)
     padVar = torch.LongTensor(padList)

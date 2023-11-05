@@ -21,8 +21,6 @@ class chatbot(nn.Module):
         self.dataDir = dataDir
         self.voc = getVocab(self.name, self.dataDir)
 
-        print(self.voc.word2index)
-
         self.embedding = nn.Embedding(self.voc.num_words, hidden_size)
 
         self.encoder = EncoderRNN(
@@ -64,7 +62,6 @@ class chatbot(nn.Module):
         all_scores = torch.zeros([0], device=device)
 
         for _ in range(max_len):
-            print(decoder_input)
             decoder_output, decoder_hidden = self.decoder(
                 decoder_input, 
                 decoder_hidden, 
@@ -93,10 +90,10 @@ class chatbot(nn.Module):
             return
 
         linhas_separadas = processLines(self.dataDir)
-        batches = [tokenize([line], self.voc) for line in linhas_separadas]
-        print(batches)
+        # batches = [tokenize([line], self.voc) for line in linhas_separadas]
         finalLoss = trainIters(
-            batches,
+            self.voc,
+            linhas_separadas,
             self.encoder,
             self.decoder,
             self.encoder_optimizer,
@@ -141,10 +138,8 @@ class chatbot(nn.Module):
     def run(self, sentence):
 
         normalizedText = normalizeString(sentence)
-        print(normalizedText)
 
         indexes_batch = [indexesFromSentence(self.voc, normalizedText)]
-        print(indexes_batch)
         lengths = torch.tensor([len(indexes) for indexes in indexes_batch])
         input_batch = torch.LongTensor(indexes_batch).transpose(0, 1)
         input_batch = input_batch.to(device)
@@ -152,7 +147,6 @@ class chatbot(nn.Module):
         print(input_batch)
 
         tokens, scores = self.forward(input_batch, lengths, MAX_LENGTH)
-        print(tokens)
         # i = 0
         # tokens = torch.cat([tokens[:i], tokens[i+1:]])
         # lastIndex = (tokens.size(dim=0)) - 1
